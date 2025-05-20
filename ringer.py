@@ -1,33 +1,38 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import random
-import sys
-from itertools import combinations, product
-import string
+from itertools import product
+import argparse
 
-# The total number of rings put on a bird.
-number_of_rings = 4
+NUMBER_OF_RINGS = 4
 
-print '--Ringer code generator--'
-if len(sys.argv) <= 2:
-    print """
-    Usage: python ringer.py <stationLetter-letter> <[ring-color-letters]>
-    Example: python ringer.py M RLYB 500
-    """
-    sys.exit()
 
-stationLetter = sys.argv[1]
-letters = sys.argv[2]
-ringLetters = stationLetter + letters
+def generate_combinations(station_letter: str, letters: str):
+    """Generate all possible ring codes using provided letters."""
+    pool = station_letter + letters
+    for ring in map(''.join, product(pool, repeat=NUMBER_OF_RINGS)):
+        if ring.count(station_letter) == 1:
+            yield ring
 
-print 'generating for stationLetter %s with letters %s with max %s codes' % (stationLetter, letters, max)
 
-def generateFor(combi):
-    for length in xrange(1, len(combi)):
-        for ring in map(''.join, product(*[combi]*length)):
-            if len(ring) == number_of_rings and ring.count(stationLetter) == 1:
-                yield ring 
-            
-rings = sorted(generateFor(ringLetters))
-for ring in rings:
-    print ring
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Generate 4-letter bird ring IDs using given letters",
+    )
+    parser.add_argument(
+        "station_letter",
+        help="Station letter identifier (single character)",
+    )
+    parser.add_argument(
+        "letters",
+        help="Available ring color letters",
+    )
+    args = parser.parse_args()
+
+    print("--Ringer code generator--")
+    rings = sorted(generate_combinations(args.station_letter, args.letters))
+    for ring in rings:
+        print(ring)
+
+
+if __name__ == "__main__":
+    main()
